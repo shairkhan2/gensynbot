@@ -1005,7 +1005,7 @@ def callback_query(call):
                 bot.send_message(call.message.chat.id, "Bot update started. Bot will be back in about 1 minute.")
                 update_script_path = "/tmp/bot_update_run.sh"
                 with open(update_script_path, "w") as f:
-                    f.write("curl -s https://raw.githubusercontent.com/shairkhan2/gensyn-bot/refs/heads/main/update_bot.sh | bash\n")
+                    f.write("curl -s https://raw.githubusercontent.com/shairkhan2/gensynbot/refs/heads/main/update_bot.sh | bash\n")
                 os.chmod(update_script_path, 0o700)
                 subprocess.run(f"echo 'bash {update_script_path} >/tmp/bot_update.log 2>&1' | at now + 1 minute", shell=True)
             except Exception as e:
