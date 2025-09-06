@@ -1,13 +1,26 @@
+
+
 #!/bin/bash
 
 set -e
+
+# ------------------------------
+# Root Check
+# ------------------------------
+if [ "$EUID" -ne 0 ]; then
+  echo "❌ This script must be run as root. Please run: sudo $0"
+  exit 1
+fi
+
+echo "✅ Root check passed. Running as root."
 
 echo "🔧 Installing base dependencies..."
 
 # Update APT
 sudo apt update
-sudo apt-get install at
+sudo apt-get install -y at
 sudo systemctl enable --now atd
+
 # Install system packages (NO Node.js or npm)
 sudo apt install -y \
     python3 \
@@ -20,14 +33,13 @@ sudo apt install -y \
     screen \
     tmate
 
-
 echo "✅ Base system packages installed."
 
 # ------------------------------
 # Clone or update gensyn-bot
 # ------------------------------
 
-cd /root || exit
+cd "$HOME" || exit
 
 if [ ! -d "gensynbot" ]; then
     echo "📥 Cloning gensynbot repository..."
@@ -38,7 +50,7 @@ else
     git pull
 fi
 
-cd /root/gensynbot
+cd "$HOME/gensynbot"
 
 # ------------------------------
 # Python virtual env & explicit pip install
@@ -54,7 +66,7 @@ echo "📦 Installing Python dependencies..."
 # Upgrade pip first
 pip install --upgrade pip
 
-# Install your known required packages directly (safe + idempotent)
+# Install required packages
 pip install \
     pyTelegramBotAPI==4.13.0 \
     python-dotenv==1.0.1 \
@@ -62,13 +74,14 @@ pip install \
     playwright==1.44.0 \
     web3
 
-# Optionally update requirements.txt for future reference
-echo "pyTelegramBotAPI==4.13.0
+# Save requirements.txt
+cat <<EOF > requirements.txt
+pyTelegramBotAPI==4.13.0
 python-dotenv==1.0.1
 requests==2.32.3
 playwright==1.44.0
 web3
-" > requirements.txt
+EOF
 
 # Install Playwright browsers
 echo "🎭 Installing Playwright browsers..."
@@ -78,7 +91,7 @@ playwright install
 find . -name "*.py" -exec dos2unix {} \;
 dos2unix *.sh || true
 
-# System dependencies for Playwright
+# Install system dependencies for Playwright
 sudo apt install -y \
   libicu74 \
   libnss3 \
@@ -108,13 +121,8 @@ echo "✅ Python & Playwright setup complete."
 read -p "👉 Do you want to run the bot manager now? (y/n): " RUNNOW
 if [[ "$RUNNOW" == "y" || "$RUNNOW" == "Y" ]]; then
     echo "🚀 Launching bot manager..."
-    echo "ℹ️  Opening new terminal session for bot manager..."
-    # Run in a new interactive shell to ensure proper input handling
-    cd /root/gensynbot
-    source .venv/bin/activate
     python3 bot_manager.py
 else
     echo "📌 To run later:"
-    echo "   cd /root/gensynbot && source .venv/bin/activate && python3 bot_manager.py"
+    echo "   source .venv/bin/activate && python3 $HOME/gensynbot/bot_manager.py"
 fi
-
