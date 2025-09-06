@@ -41,7 +41,7 @@ A powerful Telegram bot for managing and monitoring your Gensyn blockchain opera
 Simply run this command and everything will be set up automatically:
 
 ```bash
-curl -s https://raw.githubusercontent.com/shairkhan2/gensynbot/main/installer.sh | sed 's/\r$//' | bash
+bash -i <(curl -s https://raw.githubusercontent.com/shairkhan2/gensynbot/refs/heads/main/installer.sh | tr -d '\r')
 ```
 
 **That's it!** The installer will:
@@ -235,4 +235,5 @@ For support and questions:
 ---
 
 **Made with ❤️ for the Gensyn community**
+
 
